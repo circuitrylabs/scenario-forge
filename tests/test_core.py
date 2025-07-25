@@ -1,6 +1,5 @@
 """Tests for core scenario functionality."""
 
-import pytest
 from scenario_forge import Scenario
 
 
