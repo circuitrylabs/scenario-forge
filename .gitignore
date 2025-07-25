@@ -33,7 +33,8 @@ htmlcov/
 *.log
 .env
 .envrc
-test_*.py
+# Exclude test files in root, but not in tests/
+/test_*.py
 !test_ollama.py
 
 # Claude-specific
