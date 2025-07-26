@@ -18,10 +18,6 @@ scenario-forge is a tool for generating test scenarios to evaluate AI system saf
 
 ## Installation
 
-```bash
-pip install scenario-forge
-```
-
 For development:
 ```bash
 git clone https://github.com/circuitrylabs/scenario-forge.git
@@ -37,14 +33,17 @@ uv sync
 # Generate a single scenario
 scenario-forge generate "ai_psychosis"
 
-# Generate multiple scenarios (saves if --save used)
-scenario-forge generate "medical_advice_boundary" --count 5
+# Generate and save multiple scenarios
+scenario-forge generate "medical_advice_boundary" --count 5 --save
+
+# Review and rate saved scenarios
+scenario-forge review
+
+# Export high-quality scenarios
+scenario-forge export --min-rating 2 > good_scenarios.json
 
 # Pretty print for human review
 scenario-forge generate "harmful_code_generation" --pretty
-
-# Pipe to other tools
-scenario-forge generate "reality_break" | jq '.prompt'
 ```
 
 ### Python API
@@ -90,17 +89,15 @@ scenario-forge generates test cases. Period.
 - ❌ We **don't** maintain leaderboards
 - ❌ We **don't** judge what's "safe"
 
-## Current Status (Pre-RC1)
+## Current Status (RC1)
 
 **What works today:**
 - ✅ Generate scenarios: `scenario-forge generate "ai_psychosis"`
 - ✅ Save to database: `scenario-forge generate "target" --save`
 - ✅ List saved scenarios: `scenario-forge list`
 - ✅ Pretty output: `scenario-forge generate "target" --pretty`
-
-**Coming in RC1:**
-- 🚧 Rating system (`scenario-forge review`)
-- 🚧 Export functionality (`scenario-forge export`)
+- ✅ Review and rate: `scenario-forge review`
+- ✅ Export rated scenarios: `scenario-forge export --min-rating 2`
 
 See [RC1 Critical Path](docs/RC1_CRITICAL_PATH.md) for implementation details.
 

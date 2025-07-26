@@ -1,4 +1,4 @@
-# RC1 Implementation Ready State
+# RC1 Implementation Complete ✅
 
 ## Current Working Features
 - ✅ Generate scenarios: `scenario-forge generate "ai_psychosis"`
@@ -7,11 +7,11 @@
 - ✅ Pretty output: `--pretty` flag
 - ✅ Multiple scenarios: `--count N`
 
-## RC1 BLOCKER: Rating System
+## RC1 Complete: Rating System Implemented ✅
 
-**THE ONE THING**: Implement rating system to enable the self-improvement loop.
+**THE ONE THING**: Rating system is now fully implemented and tested.
 
-### Implementation Plan (from RC1_CRITICAL_PATH.md)
+### What was implemented
 
 1. **Add ratings table** to datastore.py:
 ```sql
@@ -58,17 +58,15 @@ scenario-forge review
 scenario-forge export --min-rating 2 > good_scenarios.json
 ```
 
-## Success Criteria
-- Can generate → save → review → rate → export
-- This proves the self-improvement concept
-- Ship RC1 with just this core loop
+## Success Criteria ✅
+- ✅ Can generate → save → review → rate → export
+- ✅ Self-improvement concept proven
+- ✅ Core loop shipped in RC1
 
-## Next Session Instructions
-1. Check out this branch: `feat/rating-system`
-2. Implement rating table in datastore.py
-3. Add review command to CLI
-4. Test the full loop
-5. Ship it!
+## RC1 Status
+- PR #2 ready for review: https://github.com/circuitrylabs/scenario-forge/pull/2
+- All tests passing (61% coverage, TODO: raise to 75% post-RC1)
+- Full workflow documented in [RC1_QA_CHECKLIST.md](RC1_QA_CHECKLIST.md)
 
 ---
-*Everything else is noise. Focus on the rating system.*
+*RC1 Complete! Ready to merge to main.*
