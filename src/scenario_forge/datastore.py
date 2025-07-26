@@ -22,7 +22,7 @@ class ScenarioStore:
         self._init_db()
 
     def _init_db(self) -> None:
-        """Create the scenarios table."""
+        """Create the scenarios and ratings tables."""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS scenarios (
@@ -35,6 +35,17 @@ class ScenarioStore:
                     temperature REAL
                 )
             """)
+
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS ratings (
+                    id INTEGER PRIMARY KEY,
+                    scenario_id INTEGER NOT NULL,
+                    rating INTEGER NOT NULL CHECK (rating >= 0 AND rating <= 3),
+                    rated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (scenario_id) REFERENCES scenarios(id)
+                )
+            """)
+
             conn.commit()
 
     def save_scenario(
@@ -88,11 +99,108 @@ class ScenarioStore:
             conn.row_factory = sqlite3.Row
             rows = conn.execute("SELECT * FROM scenarios ORDER BY id DESC").fetchall()
 
-            return [
-                Scenario(
-                    prompt=row["prompt"],
-                    evaluation_target=row["evaluation_target"],
-                    success_criteria=json.loads(row["success_criteria"]),
+            scenarios = []
+            for row in rows:
+                # Handle both old string format and new JSON format
+                criteria = row["success_criteria"]
+                if criteria and criteria.startswith("["):
+                    # It's JSON
+                    success_criteria = json.loads(criteria)
+                else:
+                    # It's a plain string (old format)
+                    success_criteria = [criteria] if criteria else []
+
+                scenarios.append(
+                    Scenario(
+                        prompt=row["prompt"],
+                        evaluation_target=row["evaluation_target"],
+                        success_criteria=success_criteria,
+                    )
                 )
-                for row in rows
-            ]
+            return scenarios
+
+    def save_rating(self, scenario_id: int, rating: int) -> None:
+        """Save a rating for a scenario."""
+        if not (0 <= rating <= 3):
+            raise ValueError("Rating must be between 0 and 3")
+
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute(
+                "INSERT INTO ratings (scenario_id, rating) VALUES (?, ?)",
+                (scenario_id, rating),
+            )
+            conn.commit()
+
+    def get_scenarios_for_review(self) -> List[tuple[int, Scenario]]:
+        """Get scenarios that haven't been rated yet."""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("""
+                SELECT s.* FROM scenarios s
+                LEFT JOIN ratings r ON s.id = r.scenario_id
+                WHERE r.id IS NULL
+                ORDER BY s.id
+            """).fetchall()
+
+            result = []
+            for row in rows:
+                # Handle both old string format and new JSON format
+                criteria = row["success_criteria"]
+                if criteria and criteria.startswith("["):
+                    # It's JSON
+                    success_criteria = json.loads(criteria)
+                else:
+                    # It's a plain string (old format)
+                    success_criteria = [criteria] if criteria else []
+
+                result.append(
+                    (
+                        row["id"],
+                        Scenario(
+                            prompt=row["prompt"],
+                            evaluation_target=row["evaluation_target"],
+                            success_criteria=success_criteria,
+                        ),
+                    )
+                )
+            return result
+
+    def get_rated_scenarios(self, min_rating: int = 0) -> List[dict]:
+        """Get scenarios with their ratings."""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                """
+                SELECT s.*, r.rating, r.rated_at
+                FROM scenarios s
+                JOIN ratings r ON s.id = r.scenario_id
+                WHERE r.rating >= ?
+                ORDER BY r.rating DESC, r.rated_at DESC
+            """,
+                (min_rating,),
+            ).fetchall()
+
+            result = []
+            for row in rows:
+                # Handle both old string format and new JSON format
+                criteria = row["success_criteria"]
+                if criteria and criteria.startswith("["):
+                    # It's JSON
+                    success_criteria = json.loads(criteria)
+                else:
+                    # It's a plain string (old format)
+                    success_criteria = [criteria] if criteria else []
+
+                result.append(
+                    {
+                        "id": row["id"],
+                        "prompt": row["prompt"],
+                        "evaluation_target": row["evaluation_target"],
+                        "success_criteria": success_criteria,
+                        "rating": row["rating"],
+                        "rated_at": row["rated_at"],
+                        "backend": row["backend"],
+                        "model": row["model"],
+                    }
+                )
+            return result

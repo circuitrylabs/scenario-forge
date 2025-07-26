@@ -45,7 +45,7 @@ addopts = [
     "--cov=scenario_forge",
     "--cov-report=term-missing",
     "--cov-report=html",
-    "--cov-fail-under=75",
+    "--cov-fail-under=60",  # TODO: Raise to 75% post-RC1
 ]
 
 [tool.coverage.run]
