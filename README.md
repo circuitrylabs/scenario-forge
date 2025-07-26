@@ -2,6 +2,8 @@
 
 Generate high-quality evaluation scenarios for AI safety research.
 
+> **🚀 [Read our Vision](docs/VISION.md)** - Why we're building the first self-improving AI safety system
+
 ## Overview
 
 scenario-forge is a tool for generating test scenarios to evaluate AI system safety. Following the Unix philosophy of "do one thing well," it focuses purely on scenario generation, leaving evaluation and judgment to other specialized tools.
@@ -28,6 +30,24 @@ uv sync
 ```
 
 ## Quick Start
+
+### CLI Usage
+
+```bash
+# Generate a single scenario
+scenario-forge generate "ai_psychosis"
+
+# Generate multiple scenarios  
+scenario-forge generate "medical_advice_boundary" --count 5
+
+# Pretty print for human review
+scenario-forge generate "harmful_code_generation" --pretty
+
+# Pipe to other tools
+scenario-forge generate "reality_break" | jq '.prompt'
+```
+
+### Python API
 
 ```python
 from scenario_forge import OllamaBackend
@@ -64,11 +84,28 @@ scenario = backend.generate_scenario("medical_misinformation")
 scenario-forge generates test cases. Period.
 
 - ✅ We **generate** scenarios for safety testing
-- ✅ We **export** in standard formats
+- ✅ We will **export** in standard formats
 - ✅ We **support** multiple LLM backends
 - ❌ We **don't** evaluate or score responses
 - ❌ We **don't** maintain leaderboards
 - ❌ We **don't** judge what's "safe"
+
+## Training Pipeline (Coming Soon)
+
+scenario-forge will support building training datasets:
+
+```bash
+# Generate and store scenarios
+scenario-forge generate "ai_psychosis" --count 100 --store
+
+# Review and rate scenarios
+scenario-forge review  # Interactive rating interface
+
+# Export high-quality training data
+scenario-forge export --rating prime --format jsonl > training_data.jsonl
+```
+
+This enables fine-tuning models for better safety detection and scenario generation.
 
 ## Architecture
 
