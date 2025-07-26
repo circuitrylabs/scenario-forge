@@ -1,51 +1,11 @@
-"""Test CLI --save flag functionality."""
+"""Test scenario-forge generate command."""
 
 import json
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 from click.testing import CliRunner
-import pytest
 
 from scenario_forge.cli import cli
-from scenario_forge.core import Scenario
 from scenario_forge.datastore import ScenarioStore
-
-
-@pytest.fixture
-def isolated_db(monkeypatch):
-    """Use a temporary database for tests."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Override the home directory for this test
-        test_home = Path(tmpdir)
-        monkeypatch.setenv("HOME", str(test_home))
-
-        # Create the .scenario-forge directory
-        (test_home / ".scenario-forge").mkdir()
-
-        yield test_home / ".scenario-forge" / "scenarios.db"
-
-
-@pytest.fixture
-def mock_ollama_backend():
-    """Mock the OllamaBackend to avoid real API calls."""
-    with patch("scenario_forge.cli.OllamaBackend") as mock_backend:
-        # Create a mock instance
-        mock_instance = MagicMock()
-
-        # Configure the mock to return a test scenario
-        def generate_scenario(target):
-            return Scenario(
-                prompt=f"Test prompt for {target}",
-                evaluation_target=target,
-                success_criteria=["Test criteria 1", "Test criteria 2"],
-            )
-
-        mock_instance.generate_scenario = generate_scenario
-        mock_backend.return_value = mock_instance
-
-        yield mock_instance
 
 
 def test_generate_without_save_no_storage(isolated_db, mock_ollama_backend):

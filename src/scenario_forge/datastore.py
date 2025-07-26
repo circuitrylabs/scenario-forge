@@ -93,31 +93,29 @@ class ScenarioStore:
                 )
             return None
 
+    def _parse_success_criteria(self, criteria: Optional[str]) -> List[str]:
+        """Parse success criteria from old string or new JSON format."""
+        if criteria and criteria.startswith("["):
+            return json.loads(criteria)
+        else:
+            return [criteria] if criteria else []
+
     def list_all_scenarios(self) -> List[Scenario]:
         """List all scenarios."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute("SELECT * FROM scenarios ORDER BY id DESC").fetchall()
 
-            scenarios = []
-            for row in rows:
-                # Handle both old string format and new JSON format
-                criteria = row["success_criteria"]
-                if criteria and criteria.startswith("["):
-                    # It's JSON
-                    success_criteria = json.loads(criteria)
-                else:
-                    # It's a plain string (old format)
-                    success_criteria = [criteria] if criteria else []
-
-                scenarios.append(
-                    Scenario(
-                        prompt=row["prompt"],
-                        evaluation_target=row["evaluation_target"],
-                        success_criteria=success_criteria,
-                    )
+            return [
+                Scenario(
+                    prompt=row["prompt"],
+                    evaluation_target=row["evaluation_target"],
+                    success_criteria=self._parse_success_criteria(
+                        row["success_criteria"]
+                    ),
                 )
-            return scenarios
+                for row in rows
+            ]
 
     def save_rating(self, scenario_id: int, rating: int) -> None:
         """Save a rating for a scenario."""
@@ -142,28 +140,19 @@ class ScenarioStore:
                 ORDER BY s.id
             """).fetchall()
 
-            result = []
-            for row in rows:
-                # Handle both old string format and new JSON format
-                criteria = row["success_criteria"]
-                if criteria and criteria.startswith("["):
-                    # It's JSON
-                    success_criteria = json.loads(criteria)
-                else:
-                    # It's a plain string (old format)
-                    success_criteria = [criteria] if criteria else []
-
-                result.append(
-                    (
-                        row["id"],
-                        Scenario(
-                            prompt=row["prompt"],
-                            evaluation_target=row["evaluation_target"],
-                            success_criteria=success_criteria,
+            return [
+                (
+                    row["id"],
+                    Scenario(
+                        prompt=row["prompt"],
+                        evaluation_target=row["evaluation_target"],
+                        success_criteria=self._parse_success_criteria(
+                            row["success_criteria"]
                         ),
-                    )
+                    ),
                 )
-            return result
+                for row in rows
+            ]
 
     def get_rated_scenarios(self, min_rating: int = 0) -> List[dict]:
         """Get scenarios with their ratings."""
@@ -180,27 +169,18 @@ class ScenarioStore:
                 (min_rating,),
             ).fetchall()
 
-            result = []
-            for row in rows:
-                # Handle both old string format and new JSON format
-                criteria = row["success_criteria"]
-                if criteria and criteria.startswith("["):
-                    # It's JSON
-                    success_criteria = json.loads(criteria)
-                else:
-                    # It's a plain string (old format)
-                    success_criteria = [criteria] if criteria else []
-
-                result.append(
-                    {
-                        "id": row["id"],
-                        "prompt": row["prompt"],
-                        "evaluation_target": row["evaluation_target"],
-                        "success_criteria": success_criteria,
-                        "rating": row["rating"],
-                        "rated_at": row["rated_at"],
-                        "backend": row["backend"],
-                        "model": row["model"],
-                    }
-                )
-            return result
+            return [
+                {
+                    "id": row["id"],
+                    "prompt": row["prompt"],
+                    "evaluation_target": row["evaluation_target"],
+                    "success_criteria": self._parse_success_criteria(
+                        row["success_criteria"]
+                    ),
+                    "rating": row["rating"],
+                    "rated_at": row["rated_at"],
+                    "backend": row["backend"],
+                    "model": row["model"],
+                }
+                for row in rows
+            ]
