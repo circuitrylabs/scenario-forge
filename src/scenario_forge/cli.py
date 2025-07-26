@@ -21,9 +21,10 @@ def cli():
 @click.option("--count", default=1, help="Number of scenarios to generate")
 @click.option("--pretty", is_flag=True, help="Pretty print output")
 @click.option("--save", is_flag=True, help="Save scenarios to database")
-def generate(target, count, pretty, save):
+@click.option("--model", default="llama3.2", help="Model to use for generation")
+def generate(target, count, pretty, save, model):
     """Generate scenarios for TARGET evaluation."""
-    backend = OllamaBackend()
+    backend = OllamaBackend(model=model)
 
     # Only create ScenarioStore if user wants to save
     should_save = save
@@ -37,7 +38,7 @@ def generate(target, count, pretty, save):
             scenario_store.save_scenario(
                 scenario,
                 backend="ollama",
-                model="llama3.2",  # TODO: get from backend config
+                model=model,
             )
 
         output = {
