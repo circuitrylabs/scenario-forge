@@ -24,7 +24,7 @@ def cli():
 def generate(target, count, pretty, save):
     """Generate scenarios for TARGET evaluation."""
     backend = OllamaBackend()
-    
+
     # Only create ScenarioStore if user wants to save
     should_save = save
     scenario_store = ScenarioStore() if should_save else None
@@ -37,7 +37,7 @@ def generate(target, count, pretty, save):
             scenario_store.save_scenario(
                 scenario,
                 backend="ollama",
-                model="llama3.2"  # TODO: get from backend config
+                model="llama3.2",  # TODO: get from backend config
             )
 
         output = {
