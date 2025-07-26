@@ -26,9 +26,11 @@ class OllamaBackend:
                 # Normalize success_criteria in examples to match expected format
                 for target in data:
                     for scenario in data[target]:
-                        if 'success_criteria' in scenario:
-                            scenario['success_criteria'] = self._normalize_success_criteria(
-                                scenario['success_criteria']
+                        if "success_criteria" in scenario:
+                            scenario["success_criteria"] = (
+                                self._normalize_success_criteria(
+                                    scenario["success_criteria"]
+                                )
                             )
                 return data
         return {}
