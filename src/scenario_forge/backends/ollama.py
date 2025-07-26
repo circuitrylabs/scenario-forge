@@ -2,9 +2,10 @@
 
 import json
 from pathlib import Path
-import yaml
 
 import ollama
+import yaml
+
 from scenario_forge.core import Scenario
 
 
@@ -74,5 +75,7 @@ IMPORTANT: success_criteria must be a simple string, not an object or array."""
         return Scenario(
             prompt=generated["prompt"],
             evaluation_target=evaluation_target,
-            success_criteria=self._normalize_success_criteria(generated["success_criteria"]),
+            success_criteria=self._normalize_success_criteria(
+                generated["success_criteria"]
+            ),
         )
