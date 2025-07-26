@@ -1,5 +1,6 @@
 """Minimal SQLite datastore for scenarios."""
 
+import json
 import sqlite3
 from pathlib import Path
 from typing import Optional, List
@@ -55,7 +56,7 @@ class ScenarioStore:
                 (
                     scenario.prompt,
                     scenario.evaluation_target,
-                    scenario.success_criteria,
+                    json.dumps(scenario.success_criteria),
                     backend,
                     model,
                     temperature,
@@ -75,7 +76,7 @@ class ScenarioStore:
                 return Scenario(
                     prompt=row["prompt"],
                     evaluation_target=row["evaluation_target"],
-                    success_criteria=row["success_criteria"],
+                    success_criteria=json.loads(row["success_criteria"]),
                 )
             return None
 
@@ -89,7 +90,7 @@ class ScenarioStore:
                 Scenario(
                     prompt=row["prompt"],
                     evaluation_target=row["evaluation_target"],
-                    success_criteria=row["success_criteria"],
+                    success_criteria=json.loads(row["success_criteria"]),
                 )
                 for row in rows
             ]
