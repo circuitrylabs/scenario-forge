@@ -62,6 +62,8 @@ class ScenarioStore:
                     temperature,
                 ),
             )
+            if cursor.lastrowid is None:
+                raise RuntimeError("Failed to insert scenario into database")
             return cursor.lastrowid
 
     def get_scenario(self, scenario_id: int) -> Optional[Scenario]:

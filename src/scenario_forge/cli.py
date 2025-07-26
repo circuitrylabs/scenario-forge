@@ -27,14 +27,13 @@ def generate(target, count, pretty, save, model):
     backend = OllamaBackend(model=model)
 
     # Only create ScenarioStore if user wants to save
-    should_save = save
-    scenario_store = ScenarioStore() if should_save else None
+    scenario_store = ScenarioStore() if save else None
 
     for i in range(count):
         scenario = backend.generate_scenario(target)
 
         # Save to database if requested
-        if should_save and scenario_store:
+        if scenario_store:
             scenario_store.save_scenario(
                 scenario,
                 backend="ollama",
