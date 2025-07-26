@@ -2,94 +2,84 @@
 
 import json
 from click.testing import CliRunner
-from unittest.mock import patch
 
 from scenario_forge.cli import cli
 from scenario_forge.core import Scenario
 
 
-def test_list_command_empty():
+def test_list_command_empty(isolated_db):
     """Test list command with no scenarios."""
     runner = CliRunner()
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store.return_value.list_all_scenarios.return_value = []
+    # Use real empty database
+    result = runner.invoke(cli, ["list"])
 
-        result = runner.invoke(cli, ["list"])
-
-        assert result.exit_code == 0
-        assert "No scenarios found" in result.output
+    assert result.exit_code == 0
+    assert "No scenarios found" in result.output
 
 
-def test_list_command_with_scenarios():
+def test_list_command_with_scenarios(isolated_db):
     """Test list command with scenarios."""
     runner = CliRunner()
 
-    mock_scenarios = [
-        Scenario("Prompt 1", "target1", ["criteria1"]),
-        Scenario("Prompt 2", "target2", ["criteria2", "criteria3"]),
-    ]
+    # Create some scenarios using real database
+    from scenario_forge.datastore import ScenarioStore
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store.return_value.list_all_scenarios.return_value = mock_scenarios
+    store = ScenarioStore(isolated_db)
 
-        result = runner.invoke(cli, ["list"])
+    scenario1 = Scenario("Prompt 1", "target1", ["criteria1"])
+    scenario2 = Scenario("Prompt 2", "target2", ["criteria2", "criteria3"])
 
-        assert result.exit_code == 0
-        assert "Found 2 scenarios" in result.output
-        assert "target1" in result.output
-        assert "target2" in result.output
+    store.save_scenario(scenario1)
+    store.save_scenario(scenario2)
+
+    result = runner.invoke(cli, ["list"])
+
+    assert result.exit_code == 0
+    assert "Found 2 scenarios" in result.output
+    assert "target1" in result.output
+    assert "target2" in result.output
 
 
-def test_export_command_no_rated():
+def test_export_command_no_rated(isolated_db):
     """Test export command when no rated scenarios exist."""
     runner = CliRunner()
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store.return_value.get_rated_scenarios.return_value = []
+    # Use real ScenarioStore with isolated database instead of mocking
+    result = runner.invoke(cli, ["export"])
 
-        result = runner.invoke(cli, ["export"])
-
-        assert result.exit_code == 0
-        assert "No scenarios found with rating >= 0" in result.output
+    assert result.exit_code == 0
+    assert "No scenarios found with rating >= 0" in result.output
 
 
-def test_export_command_with_filter():
+def test_export_command_with_filter(isolated_db):
     """Test export command with minimum rating filter."""
     runner = CliRunner()
 
-    mock_rated_scenarios = [
-        {
-            "id": 1,
-            "prompt": "Test prompt 1",
-            "evaluation_target": "target1",
-            "success_criteria": ["criteria1"],
-            "rating": 3,
-            "rated_at": "2024-01-01T12:00:00",
-            "backend": "ollama",
-            "model": "llama3.2",
-        },
-        {
-            "id": 2,
-            "prompt": "Test prompt 2",
-            "evaluation_target": "target2",
-            "success_criteria": ["criteria2", "criteria3"],
-            "rating": 2,
-            "rated_at": "2024-01-01T13:00:00",
-            "backend": "ollama",
-            "model": "llama3.2",
-        },
-    ]
+    # Create some rated scenarios using real database
+    from scenario_forge.datastore import ScenarioStore
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store.return_value.get_rated_scenarios.return_value = mock_rated_scenarios
+    store = ScenarioStore(isolated_db)
 
-        result = runner.invoke(cli, ["export", "--min-rating", "2"])
+    # Add scenarios and rate them
+    scenario1 = Scenario("Test prompt 1", "target1", ["criteria1"])
+    scenario2 = Scenario("Test prompt 2", "target2", ["criteria2", "criteria3"])
+    scenario3 = Scenario("Test prompt 3", "target3", ["criteria4"])
 
-        assert result.exit_code == 0
+    id1 = store.save_scenario(scenario1, backend="ollama", model="llama3.2")
+    id2 = store.save_scenario(scenario2, backend="ollama", model="llama3.2")
+    id3 = store.save_scenario(scenario3, backend="ollama", model="llama3.2")
 
-        # Parse JSON output
-        exported = json.loads(result.output)
-        assert len(exported) == 2
-        assert exported[0]["rating"] == 3
-        assert exported[1]["rating"] == 2
+    store.save_rating(id1, 3)
+    store.save_rating(id2, 2)
+    store.save_rating(id3, 1)  # This one should be filtered out
+
+    result = runner.invoke(cli, ["export", "--min-rating", "2"])
+
+    assert result.exit_code == 0
+
+    # Parse JSON output
+    exported = json.loads(result.output)
+    assert len(exported) == 2
+    assert exported[0]["rating"] == 3
+    assert exported[1]["rating"] == 2

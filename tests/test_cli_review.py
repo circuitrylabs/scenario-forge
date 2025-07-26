@@ -1,64 +1,66 @@
 """Test scenario-forge review command."""
 
 from click.testing import CliRunner
-from unittest.mock import patch
 
 from scenario_forge.cli import cli
+from scenario_forge.datastore import ScenarioStore
 
 
 def test_review_command_no_scenarios(isolated_db):
     """Test review command when no unrated scenarios exist."""
     runner = CliRunner()
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store.return_value.get_scenarios_for_review.return_value = []
+    # Use real empty database
+    result = runner.invoke(cli, ["review"])
 
-        result = runner.invoke(cli, ["review"])
-
-        assert result.exit_code == 0
-        assert "No unrated scenarios found" in result.output
+    assert result.exit_code == 0
+    assert "No unrated scenarios found" in result.output
 
 
 def test_review_command_with_rating(isolated_db, sample_scenarios):
     """Test reviewing and rating scenarios."""
     runner = CliRunner()
 
-    # Mock scenarios to review
-    scenarios_with_ids = [(1, sample_scenarios[0]), (2, sample_scenarios[1])]
+    # Create some unrated scenarios in the database
+    store = ScenarioStore(isolated_db)
+    store.save_scenario(sample_scenarios[0])
+    store.save_scenario(sample_scenarios[1])
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store_instance = mock_store.return_value
-        mock_store_instance.get_scenarios_for_review.return_value = scenarios_with_ids
+    # Simulate user input: rate first as 3, second as 2
+    result = runner.invoke(cli, ["review"], input="3\n2\n")
 
-        # Simulate user input: rate first as 3, second as 2
-        result = runner.invoke(cli, ["review"], input="3\n2\n")
+    assert result.exit_code == 0
+    assert "Found 2 scenarios to review" in result.output
+    assert "ai_psychosis" in result.output
+    assert "harmful_code" in result.output
 
-        assert result.exit_code == 0
-        assert "Found 2 scenarios to review" in result.output
-        assert "ai_psychosis" in result.output
-        assert "harmful_code" in result.output
-
-        # Verify ratings were saved
-        assert mock_store_instance.save_rating.call_count == 2
-        mock_store_instance.save_rating.assert_any_call(1, 3)
-        mock_store_instance.save_rating.assert_any_call(2, 2)
+    # Verify ratings were saved by checking the database
+    rated_scenarios = store.get_rated_scenarios()
+    assert len(rated_scenarios) == 2
+    assert any(
+        s["rating"] == 3 and s["evaluation_target"] == "ai_psychosis"
+        for s in rated_scenarios
+    )
+    assert any(
+        s["rating"] == 2 and s["evaluation_target"] == "harmful_code"
+        for s in rated_scenarios
+    )
 
 
 def test_review_command_skip_scenario(isolated_db, sample_scenarios):
     """Test skipping a scenario during review."""
     runner = CliRunner()
 
-    scenarios_with_ids = [(1, sample_scenarios[0])]
+    # Create an unrated scenario in the database
+    store = ScenarioStore(isolated_db)
+    store.save_scenario(sample_scenarios[0])
 
-    with patch("scenario_forge.cli.ScenarioStore") as mock_store:
-        mock_store_instance = mock_store.return_value
-        mock_store_instance.get_scenarios_for_review.return_value = scenarios_with_ids
+    # Simulate Ctrl+C (abort)
+    result = runner.invoke(cli, ["review"], input="\x03")
 
-        # Simulate Ctrl+C (abort)
-        result = runner.invoke(cli, ["review"], input="\x03")
+    assert result.exit_code == 0
+    assert "Skipping this scenario" in result.output
 
-        assert result.exit_code == 0
-        assert "Skipping this scenario" in result.output
-
-        # No rating should be saved
-        mock_store_instance.save_rating.assert_not_called()
+    # No rating should be saved
+    rated_scenarios = store.get_rated_scenarios()
+    assert len(rated_scenarios) == 0
