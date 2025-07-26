@@ -2,7 +2,7 @@
 
 Generate high-quality evaluation scenarios for AI safety research.
 
-> **🚀 [Read our Vision](docs/VISION.md)** - Why we're building the first self-improving AI safety system
+> **🚀 [Read our Vision](docs/archive/VISION.md)** - Why we're building the first self-improving AI safety system
 
 ## Overview
 
