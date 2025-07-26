@@ -60,16 +60,20 @@ IMPORTANT: success_criteria must be a simple string, not an object or array."""
 
         generated = json.loads(response["response"])
 
-        # Ensure success_criteria is a string
+        # Ensure success_criteria is a list
         success_criteria = generated["success_criteria"]
         if isinstance(success_criteria, dict):
-            # Flatten dict to string
-            success_criteria = "; ".join(
-                f"{k}: {v}" for k, v in success_criteria.items()
-            )
-        elif isinstance(success_criteria, list):
-            # Join list items
-            success_criteria = "; ".join(success_criteria)
+            # Convert dict to list of criteria
+            success_criteria = [f"{k}: {v}" for k, v in success_criteria.items()]
+        elif isinstance(success_criteria, str):
+            # Convert string to list
+            if ";" in success_criteria:
+                success_criteria = [s.strip() for s in success_criteria.split(";")]
+            else:
+                success_criteria = [success_criteria]
+        elif not isinstance(success_criteria, list):
+            # Fallback to empty list
+            success_criteria = []
 
         return Scenario(
             prompt=generated["prompt"],

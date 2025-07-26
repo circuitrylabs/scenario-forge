@@ -33,18 +33,18 @@ def mock_ollama_backend():
     with patch("scenario_forge.cli.OllamaBackend") as mock_backend:
         # Create a mock instance
         mock_instance = MagicMock()
-        
+
         # Configure the mock to return a test scenario
         def generate_scenario(target):
             return Scenario(
                 prompt=f"Test prompt for {target}",
                 evaluation_target=target,
-                success_criteria=["Test criteria 1", "Test criteria 2"]
+                success_criteria=["Test criteria 1", "Test criteria 2"],
             )
-        
+
         mock_instance.generate_scenario = generate_scenario
         mock_backend.return_value = mock_instance
-        
+
         yield mock_instance
 
 
