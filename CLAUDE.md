@@ -60,9 +60,16 @@ Every scenario must have:
 
 ## Development Commands
 
-### Run the application
+### Generate scenarios
 ```bash
-uv run main.py
+# Single scenario
+uv run scenario-forge generate "ai_psychosis"
+
+# Multiple scenarios with pretty output
+uv run scenario-forge generate "reality_break" --count 5 --pretty
+
+# Pipe to jq for processing
+uv run scenario-forge generate "harmful_code" | jq '.prompt'
 ```
 
 ### Install dependencies
@@ -105,15 +112,17 @@ uv run pytest tests/ -v
 
 ## Project Structure
 
-- `main.py` - Entry point for the application
 - `src/scenario_forge/` - Core package
-  - `core/` - Base classes and protocols
-  - `generators/` - Scenario generation strategies  
+  - `cli.py` - Click-based command line interface
+  - `core.py` - Base Scenario class and protocols
   - `backends/` - LLM provider adapters
-  - `exporters/` - Output format handlers
+    - `ollama.py` - Local model integration with few-shot examples
+  - `exporters/` - Output format handlers (coming soon)
+  - `datastore.py` - SQLite storage for scenarios (coming soon)
+  - `rating.py` - ScenarioRating model and review UI (coming soon)
 - `tests/` - Test suite with safety validation
-- `scenarios/` - Example scenarios and templates
-- `pyproject.toml` - Project configuration
+- `docs/` - Architecture and design documentation
+- `pyproject.toml` - Project configuration with CLI entry point
 - `uv.lock` - Dependency lock file
 
 ## Contributing

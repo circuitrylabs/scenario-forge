@@ -149,17 +149,20 @@ class YourExporter:
 
 ## Usage Patterns
 
-### CLI Usage (Future)
+### CLI Usage
 
 ```bash
 # Generate single scenario
 scenario-forge generate "medical_advice_boundary"
 
-# Generate batch
+# Generate batch (coming soon)
 scenario-forge generate "ai_psychosis" --count 100 --backend ollama
 
-# Export scenarios
-scenario-forge export scenarios.json --format json
+# Review and rate scenarios (coming soon)
+scenario-forge review
+
+# Export scenarios (coming soon)
+scenario-forge export --rating prime --format jsonl
 ```
 
 ### Library Usage
@@ -206,11 +209,44 @@ Your System
                     Feedback Loop
 ```
 
+## Training Pipeline Architecture
+
+### Datastore Design
+
+```
+┌─────────────────────────────────────────────────┐
+│              SQLite Database                    │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  ┌─────────────┐       ┌──────────────────┐    │
+│  │  Scenarios  │       │ ScenarioRatings  │    │
+│  ├─────────────┤       ├──────────────────┤    │
+│  │ id          │───────│ scenario_id      │    │
+│  │ prompt      │       │ quality_score    │    │
+│  │ target      │       │ rated_at         │    │
+│  │ criteria    │       │ rated_by         │    │
+│  │ created_at  │       └──────────────────┘    │
+│  └─────────────┘                               │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+### Rating Workflow
+
+```
+Generate → Store → Review → Rate → Export
+    │        │        │       │       │
+    ▼        ▼        ▼       ▼       ▼
+Scenario  SQLite  CLI UI  Quality  Training
+         Database         Score     Data
+```
+
 ## Future Considerations
 
 - Scenario templates for common domains
 - Seed-based reproducibility
 - Difficulty calibration
 - Multi-turn scenario generation
+- Active learning loops for model improvement
 
 But always: **Generation only. Never evaluation.**
