@@ -2,63 +2,69 @@
 
 ## Quick Start
 ```bash
-# You're working on: scenario-forge - AI safety scenario generator
-# Current focus: MVP 0.0 - Get core loop working
-# Next task: Check todos with TodoWrite tool
+# You're working on: scenario-forge RC1
+# Current branch: feat/rating-system
+# THE ONE TASK: Implement rating system (see RC1_READY.md)
 ```
 
 ## Mission
-Build self-improving AI safety system. Generate scenarios → Test → Learn → Improve.
+Build self-improving AI safety system. Generate scenarios → Save → **RATE** → Export → Learn.
 
 ## Current State
 - ✅ Core generation (Ollama)
 - ✅ SQLite storage (--save flag)
+- ✅ List command working
 - ✅ Test suite passing
-- 🔄 Need: Export, List, Rate commands
+- ✅ Docs coherent with reality
+- 🚧 **BLOCKER: Rating system**
+- 🚧 Export command (needs ratings first)
+
+## RC1 Critical Path
+1. **Read RC1_READY.md** - Has exact implementation plan
+2. **Add ratings table** - to datastore.py
+3. **Add review command** - to cli.py
+4. **Add export command** - JSON only
+5. **Test full loop** - generate → save → review → export
+6. **Ship RC1**
 
 ## Development Flow
-1. **Check todos**: Use TodoWrite tool
-2. **Pick task**: Start with highest priority
-3. **TDD**: Write test → implement → quality check
-4. **Quality**: `uvx ruff check . && uvx ty check && uv run pytest tests/ -v`
-5. **Handoff**: Update this file before closing
-
-## Key Files
-- `SCENARIO_FORGE_CORE.md` - Full project context
-- `MVP_PLAN.md` - What to build next
-- `src/scenario_forge/` - Core code
-- `tests/` - Test everything
-
-## Commands
 ```bash
-# Generate scenarios
-scenario-forge generate "ai_psychosis" --save
+# You're already on feat/rating-system branch
 
-# Run tests
-uv run pytest tests/ -v
-
-# Quality check
+# Quick quality check before starting
 uvx ruff check . && uvx ty check && uv run pytest tests/ -v
 
-# Explore saved scenarios
-sqlite3 ~/.scenario-forge/scenarios.db "SELECT * FROM scenarios;"
+# Test as you go
+uv run pytest tests/test_datastore.py -v  # After ratings table
+uv run pytest tests/test_cli.py -v        # After review command
+
+# Manual testing
+scenario-forge generate "ai_psychosis" --save
+scenario-forge list
+scenario-forge review  # NEW - implement this
+scenario-forge export  # NEW - implement this
 ```
 
-## Agent Instructions
-1. **Be direct**: Short responses, focus on code
-2. **Use todos**: TodoWrite tool tracks progress
-3. **Test first**: Always TDD
-4. **Quality matters**: Run checks before marking complete
-5. **Update on exit**: Add session summary below
+## Key Files
+- **RC1_READY.md** - START HERE! Implementation plan
+- **docs/RC1_CRITICAL_PATH.md** - Why rating matters
+- **src/scenario_forge/datastore.py** - Add ratings table
+- **src/scenario_forge/cli.py** - Add review/export commands
 
 ## Session Log
-<!-- Add your session summary here before closing -->
+
+### Session 2025-01-26 Morning (Coherence & Prep)
+- Created MISSION_VISION.md
+- Updated all docs to reflect current reality
+- Removed promises of unimplemented features
+- Created RC1_READY.md with clear plan
+- Branch: feat/rating-system
+- Ready for: Rating system implementation
 
 ### Session 2024-01-26 (Initial Setup)
 - Created datastore with save/get/list
 - Added --save flag to CLI
 - Fixed tests to use isolated databases
 - Compressed docs to SCENARIO_FORGE_CORE.md
-- Ready for: JSON export command
 
-<!-- Next session starts here -->
+<!-- Next session: Implement rating system per RC1_READY.md -->

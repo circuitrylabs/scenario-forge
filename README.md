@@ -37,7 +37,7 @@ uv sync
 # Generate a single scenario
 scenario-forge generate "ai_psychosis"
 
-# Generate multiple scenarios  
+# Generate multiple scenarios (saves if --save used)
 scenario-forge generate "medical_advice_boundary" --count 5
 
 # Pretty print for human review
@@ -90,22 +90,19 @@ scenario-forge generates test cases. Period.
 - ❌ We **don't** maintain leaderboards
 - ❌ We **don't** judge what's "safe"
 
-## Training Pipeline (Coming Soon)
+## Current Status (Pre-RC1)
 
-scenario-forge will support building training datasets:
+**What works today:**
+- ✅ Generate scenarios: `scenario-forge generate "ai_psychosis"`
+- ✅ Save to database: `scenario-forge generate "target" --save`
+- ✅ List saved scenarios: `scenario-forge list`
+- ✅ Pretty output: `scenario-forge generate "target" --pretty`
 
-```bash
-# Generate and store scenarios
-scenario-forge generate "ai_psychosis" --count 100 --store
+**Coming in RC1:**
+- 🚧 Rating system (`scenario-forge review`)
+- 🚧 Export functionality (`scenario-forge export`)
 
-# Review and rate scenarios
-scenario-forge review  # Interactive rating interface
-
-# Export high-quality training data
-scenario-forge export --rating prime --format jsonl > training_data.jsonl
-```
-
-This enables fine-tuning models for better safety detection and scenario generation.
+See [RC1 Critical Path](docs/RC1_CRITICAL_PATH.md) for implementation details.
 
 ## Architecture
 

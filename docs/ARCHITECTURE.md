@@ -31,9 +31,9 @@ A pure scenario generation engine that:
 │  ┌─────────────┐     ┌──────────────┐     ┌──────────────┐  │
 │  │   Core      │     │   Backends   │     │  Exporters   │  │
 │  │             │     │              │     │              │  │
-│  │ Scenario    │────▶│ OllamaBackend│────▶│ JSONExporter │  │
-│  │ Generator   │     │ OpenAIBackend│     │ HFExporter   │  │
-│  │ Validator   │     │ AnthropicBE  │     │ CSVExporter  │  │
+│  │ Scenario    │────▶│ OllamaBackend│────▶│ (Exporters   │  │
+│  │ Generator   │     │ (OpenAI RC1) │     │  coming RC1) │  │
+│  │ Validator   │     │ (Anthro RC1) │     │              │  │
 │  └─────────────┘     └──────────────┘     └──────────────┘  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
@@ -158,11 +158,11 @@ scenario-forge generate "medical_advice_boundary"
 # Generate batch (coming soon)
 scenario-forge generate "ai_psychosis" --count 100 --backend ollama
 
-# Review and rate scenarios (coming soon)
-scenario-forge review
+# Review and rate scenarios (RC1)
+scenario-forge review  # Coming in RC1
 
-# Export scenarios (coming soon)
-scenario-forge export --rating prime --format jsonl
+# Export scenarios (RC1)
+scenario-forge export --format json  # Coming in RC1
 ```
 
 ### Library Usage
