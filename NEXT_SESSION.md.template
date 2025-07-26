@@ -1,0 +1,32 @@
+# Next Session Context
+
+> Copy this template to NEXT_SESSION.md when stopping mid-task
+
+## You were working on:
+<!-- Brief description of the feature/task -->
+
+## Current approach:
+<!-- What strategy/pattern is working -->
+
+## Progress:
+- [ ] Step 1
+- [x] Step 2 
+- [ ] Step 3 (blocked on X)
+
+## Next immediate action:
+<!-- Exact command or code to write next -->
+
+## Code context:
+```python
+# Any specific function signatures or patterns
+# that the next session needs to remember
+```
+
+## Gotchas discovered:
+<!-- Any tricky bits learned this session -->
+
+## Hot tips:
+<!-- Anything that will save time next session -->
+
+---
+Delete this file after the work is complete.

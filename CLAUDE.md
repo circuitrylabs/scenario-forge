@@ -9,9 +9,9 @@ scenario-forge generates high-quality evaluation scenarios for AI safety researc
 ## Core Invariants (NEVER violate these)
 
 1. **Safety First**: Every generated scenario must be evaluating FOR safety, never teaching harmful patterns
-2. **Reproducibility**: All scenarios must include seed/config for exact reproduction
-3. **Transparency**: Generated scenarios must clearly state their evaluation purpose
-4. **No Jailbreaks**: Never generate scenarios designed to bypass safety measures
+2. **Transparency**: Generated scenarios must clearly state their evaluation purpose
+3. **No Jailbreaks**: Never generate scenarios designed to bypass safety measures
+4. **Branch Protection**: NEVER commit directly to main - always use feature branches
 
 ## Architecture Boundaries
 
@@ -33,7 +33,6 @@ Every scenario must have:
 - **Clear evaluation objective** (what safety property are we testing?)
 - **Expected behavior** (what should a safe AI do?)
 - **Failure modes** (what would unsafe behavior look like?)
-- **Difficulty rating** (how subtle is the safety challenge?)
 
 ## Code Standards
 
@@ -55,8 +54,10 @@ Every scenario must have:
 ## Integration Points
 
 - **CIRISAI/CIRISAgent**: Primary consumer for agent ethics verification
+- **model-forge**: Sister package that fine-tunes evaluation models using our scenarios
 - **Export formats**: JSON Schema, HuggingFace datasets, raw prompts
 - **Backend adapters**: OpenAI, Anthropic, Local models (llama.cpp)
+- **Feedback loop**: High-quality scenarios from downstream evaluations improve generation
 
 ## Development Commands
 
@@ -99,15 +100,28 @@ uvx ruff check . --fix
 
 ### Type check
 ```bash
-uvx ty
+uvx ty check
 ```
 
-### Pre-commit quality check
+### Pre-commit quality check (ALWAYS run before committing!)
 ```bash
 uvx ruff format .
 uvx ruff check . --fix
-uvx ty
+uvx ty check
 uv run pytest tests/ -v
+```
+
+### Test-Driven Development Workflow
+When implementing new features:
+1. **Write tests first**: Create failing tests in `tests/test_*.py`
+2. **Run tests to see them fail**: `uv run pytest tests/test_new_feature.py -v`
+3. **Implement minimal code**: Just enough to make tests pass
+4. **Run quality checks**: Format, lint, type check, all tests
+5. **Refactor if needed**: Keep tests passing
+
+### Quick quality check (for iterative development)
+```bash
+uvx ruff check . && uvx ty check && uv run pytest tests/ -v
 ```
 
 ## Project Structure
@@ -118,7 +132,7 @@ uv run pytest tests/ -v
   - `backends/` - LLM provider adapters
     - `ollama.py` - Local model integration with few-shot examples
   - `exporters/` - Output format handlers (coming soon)
-  - `datastore.py` - SQLite storage for scenarios (coming soon)
+  - `datastore.py` - SQLite storage for scenarios (implemented)
   - `rating.py` - ScenarioRating model and review UI (coming soon)
 - `tests/` - Test suite with safety validation
 - `docs/` - Architecture and design documentation
@@ -140,3 +154,25 @@ Create a `CLAUDE.local.md` (git-ignored) for your personal preferences like:
 - Personal debugging approaches  
 - Local model configurations
 - Individual learning notes
+
+## Agent Session Management
+
+**Starting a new session:**
+1. Read `AGENT_CONTEXT.md` first - contains mission, state, next tasks
+2. Check `NEXT_SESSION.md` if it exists - contains hot handoff context
+3. Use TodoWrite tool immediately to see current tasks
+4. Jump directly into highest priority work
+
+**During the session:**
+- Use TodoWrite to track progress
+- Run quality checks frequently: `uvx ruff check . && uvx ty check && uv run pytest tests/ -v`
+- Keep responses short and focused on code
+- Update todos as you complete tasks
+
+**Ending a session:**
+1. Follow `AGENT_HANDOFF.md` protocol
+2. Update `AGENT_CONTEXT.md` with session summary
+3. Create `NEXT_SESSION.md` if stopping mid-task
+4. Ensure clean git status and passing tests
+
+This enables low-thermal-cost handoffs between AI sessions!

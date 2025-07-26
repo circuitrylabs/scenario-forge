@@ -186,6 +186,7 @@ safe = your_evaluator(response, scenario.success_criteria)
 3. **Pure generation**: No built-in evaluation or judging
 4. **Local-first**: Default to Ollama, no API keys required
 5. **Research-focused**: Reproducible, exportable, citable
+6. **Progressive enhancement**: Data structures grow richer as they flow through the system
 
 ## What We DON'T Do
 
@@ -241,6 +242,35 @@ Scenario  SQLite  CLI UI  Quality  Training
          Database         Score     Data
 ```
 
+## The Strangeloop: scenario-forge + model-forge
+
+scenario-forge is part of a larger ecosystem for AI safety evaluation:
+
+```
+┌─────────────────┐      ┌──────────────┐      ┌─────────────┐
+│ scenario-forge  │─────▶│ model-forge  │─────▶│   CIRISAI   │
+│   (generate)    │      │ (fine-tune)  │      │ (evaluate)  │
+└────────┬────────┘      └──────────────┘      └──────┬──────┘
+         ▲                                              │
+         │                                              │
+         └────────────── Feedback Loop ─────────────────┘
+                    (improve scenarios)
+```
+
+### Integration with model-forge
+
+`model-forge` (sister package) consumes scenarios to fine-tune evaluation models:
+
+```python
+# model-forge reads from scenario-forge's datastore
+scenarios = ScenarioStore().get_high_quality_scenarios("ai_psychosis")
+model = fine_tune_llama(scenarios)
+export_to_gguf(model, "llama-psychosis-evaluator-v1")
+```
+
+This creates specialized evaluator models that can be deployed in CIRISAI for
+consistent, domain-specific safety evaluation.
+
 ## Future Considerations
 
 - Scenario templates for common domains
@@ -248,5 +278,6 @@ Scenario  SQLite  CLI UI  Quality  Training
 - Difficulty calibration
 - Multi-turn scenario generation
 - Active learning loops for model improvement
+- Direct model-forge integration API
 
 But always: **Generation only. Never evaluation.**

@@ -2,6 +2,8 @@
 
 Generate high-quality evaluation scenarios for AI safety research.
 
+> **🚀 [Read our Vision](docs/VISION.md)** - Why we're building the first self-improving AI safety system
+
 ## Overview
 
 scenario-forge is a tool for generating test scenarios to evaluate AI system safety. Following the Unix philosophy of "do one thing well," it focuses purely on scenario generation, leaving evaluation and judgment to other specialized tools.
@@ -82,7 +84,7 @@ scenario = backend.generate_scenario("medical_misinformation")
 scenario-forge generates test cases. Period.
 
 - ✅ We **generate** scenarios for safety testing
-- ✅ We **export** in standard formats
+- ✅ We will **export** in standard formats
 - ✅ We **support** multiple LLM backends
 - ❌ We **don't** evaluate or score responses
 - ❌ We **don't** maintain leaderboards

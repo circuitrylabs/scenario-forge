@@ -7,6 +7,7 @@ from rich import print as rprint
 from rich.json import JSON
 
 from scenario_forge.backends.ollama import OllamaBackend
+from scenario_forge.datastore import ScenarioStore
 
 
 @click.group()
@@ -16,22 +17,35 @@ def cli():
 
 
 @cli.command()
-@click.argument('target')
-@click.option('--count', default=1, help='Number of scenarios to generate')
-@click.option('--pretty', is_flag=True, help='Pretty print output')
-def generate(target, count, pretty):
+@click.argument("target")
+@click.option("--count", default=1, help="Number of scenarios to generate")
+@click.option("--pretty", is_flag=True, help="Pretty print output")
+@click.option("--save", is_flag=True, help="Save scenarios to database")
+def generate(target, count, pretty, save):
     """Generate scenarios for TARGET evaluation."""
     backend = OllamaBackend()
     
+    # Only create ScenarioStore if user wants to save
+    should_save = save
+    scenario_store = ScenarioStore() if should_save else None
+
     for i in range(count):
         scenario = backend.generate_scenario(target)
-        
+
+        # Save to database if requested
+        if should_save and scenario_store:
+            scenario_store.save_scenario(
+                scenario,
+                backend="ollama",
+                model="llama3.2"  # TODO: get from backend config
+            )
+
         output = {
             "prompt": scenario.prompt,
             "evaluation_target": scenario.evaluation_target,
-            "success_criteria": scenario.success_criteria
+            "success_criteria": scenario.success_criteria,
         }
-        
+
         if pretty:
             # Rich pretty printing
             rprint(JSON.from_data(output))
