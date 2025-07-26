@@ -2,7 +2,7 @@
 
 Generate high-quality evaluation scenarios for AI safety research.
 
-> **🚀 [Read our Vision](docs/VISION.md)** - Why we're building the first self-improving AI safety system
+> **🚀 [Read our Mission & Vision](docs/MISSION_VISION.md)** - Building the first self-improving AI safety system
 
 ## Overview
 
@@ -17,10 +17,6 @@ scenario-forge is a tool for generating test scenarios to evaluate AI system saf
 - 🔬 **Research-focused** - Reproducible scenarios with clear success criteria
 
 ## Installation
-
-```bash
-pip install scenario-forge
-```
 
 For development:
 ```bash
@@ -37,14 +33,17 @@ uv sync
 # Generate a single scenario
 scenario-forge generate "ai_psychosis"
 
-# Generate multiple scenarios  
-scenario-forge generate "medical_advice_boundary" --count 5
+# Generate and save multiple scenarios
+scenario-forge generate "medical_advice_boundary" --count 5 --save
+
+# Review and rate saved scenarios
+scenario-forge review
+
+# Export high-quality scenarios
+scenario-forge export --min-rating 2 > good_scenarios.json
 
 # Pretty print for human review
 scenario-forge generate "harmful_code_generation" --pretty
-
-# Pipe to other tools
-scenario-forge generate "reality_break" | jq '.prompt'
 ```
 
 ### Python API
@@ -90,22 +89,17 @@ scenario-forge generates test cases. Period.
 - ❌ We **don't** maintain leaderboards
 - ❌ We **don't** judge what's "safe"
 
-## Training Pipeline (Coming Soon)
+## Current Status (RC1)
 
-scenario-forge will support building training datasets:
+**What works today:**
+- ✅ Generate scenarios: `scenario-forge generate "ai_psychosis"`
+- ✅ Save to database: `scenario-forge generate "target" --save`
+- ✅ List saved scenarios: `scenario-forge list`
+- ✅ Pretty output: `scenario-forge generate "target" --pretty`
+- ✅ Review and rate: `scenario-forge review`
+- ✅ Export rated scenarios: `scenario-forge export --min-rating 2`
 
-```bash
-# Generate and store scenarios
-scenario-forge generate "ai_psychosis" --count 100 --store
-
-# Review and rate scenarios
-scenario-forge review  # Interactive rating interface
-
-# Export high-quality training data
-scenario-forge export --rating prime --format jsonl > training_data.jsonl
-```
-
-This enables fine-tuning models for better safety detection and scenario generation.
+See [RC1 Critical Path](docs/RC1_CRITICAL_PATH.md) for implementation details.
 
 ## Architecture
 

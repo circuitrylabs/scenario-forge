@@ -33,9 +33,15 @@ htmlcov/
 *.log
 .env
 .envrc
-# Exclude test files in root, but not in tests/
-/test_*.py
-!test_ollama.py
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+.scenario-forge/
 
 # Claude-specific
 CLAUDE.local.md
+NEXT_SESSION.md
+
+# OS files
+Thumbs.db

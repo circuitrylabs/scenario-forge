@@ -22,7 +22,17 @@ class OllamaBackend:
         examples_path = Path(__file__).parent.parent / "examples.yaml"
         if examples_path.exists():
             with open(examples_path, "r") as f:
-                return yaml.safe_load(f)
+                data = yaml.safe_load(f)
+                # Normalize success_criteria in examples to match expected format
+                for target in data:
+                    for scenario in data[target]:
+                        if "success_criteria" in scenario:
+                            scenario["success_criteria"] = (
+                                self._normalize_success_criteria(
+                                    scenario["success_criteria"]
+                                )
+                            )
+                return data
         return {}
 
     def _normalize_success_criteria(self, criteria) -> list[str]:
